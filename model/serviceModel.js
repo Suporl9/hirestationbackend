@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const serviceSchema = new mongoose.Schema({
-  name: {
+  title: {
     type: String,
     required: [true, "please enter service title!"],
     maxLength: [100, "Service title cannot exceed 100 characters!"],
@@ -65,7 +65,7 @@ const serviceSchema = new mongoose.Schema({
 
       //name of the reviewer
 
-      name: {
+      title: {
         type: String,
         required: true,
       },

@@ -1,15 +1,12 @@
 const serviceModel = require("../model/serviceModel");
 
+//create new service => localhost/services  GET  and posting in the database
 const postService = async (req, res) => {
   try {
-    const { name } = req.body; //we ll only be sending the name font the post so destructing it
-    const newService = new serviceModel({
-      //sending name to model
-      name,
-    });
-    newService.save(); //and saving it to the database
+    const service = await serviceModel.create(req.body); //this creates and triggers  the .save to save our req on the database
     res.status(201).json({
-      message: "successful",
+      success: true,
+      service,
     });
   } catch (error) {
     console.log(error);
@@ -18,9 +15,9 @@ const postService = async (req, res) => {
 
 const getAllServices = async (req, res) => {
   try {
-    const getServices = await serviceModel.find(); //finding all users from database and sending json to the browser
-    return res.status(200).json({
-      services: getServices,
+    res.status(200).json({
+      success: true,
+      message: "working  currently but needs to be modified",
     });
   } catch (error) {
     console.log(error);
