@@ -4,7 +4,7 @@ const path = require("path");
 const dotenv = require("dotenv");
 const app = express();
 const userRouter = require("./routes/userRouter");
-const jobRouter = require("./routes/jobRouter");
+const jobRouter = require("./routes/serviceRouter");
 const ConnectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -33,7 +33,7 @@ app.use(
 
 app.use("/auth", userRouter);
 
-app.use("/job", jobRouter);
+app.use("/services", jobRouter);
 
 //connect to the PORT from the config.env and if there is any type of of error user 5000 as a port
 
