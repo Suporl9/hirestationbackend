@@ -1,4 +1,5 @@
 const serviceModel = require("../model/serviceModel");
+const ErrorHandler = require("../utils/errorHandler");
 
 //create new service => localhost/services/new  POST  and posting in the database
 const postService = async (req, res) => {
@@ -9,6 +10,9 @@ const postService = async (req, res) => {
       service,
     });
   } catch (error) {
+    // return res.status(400).json({
+    //   message: "dont leave anything blank please!",
+    // });
     console.log(error);
   }
 };
@@ -28,15 +32,12 @@ const getAllServices = async (req, res) => {
 };
 
 //get single sercive title and details!!  GET => services/:id
-const getAService = async (req, res) => {
+const getAService = async (req, res, next) => {
   try {
     const id = req.params.id;
     const getService = await serviceModel.findById(id);
     if (!getService) {
-      return res.status(404).json({
-        success: false,
-        message: "Service Not Found",
-      });
+      return next(new ErrorHandler("Service not found!!", 404)); //if anything is passed as argument  in the next method express treats it as error   //pass return so that  next  line wont run and the  server will crash
     }
 
     return res.status(200).json({

@@ -8,6 +8,7 @@ const serviceRouter = require("./routes/serviceRouter");
 const ConnectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const ErrorMiddleWare = require("./middleware/errors");
 
 //path for working with the directories
 
@@ -35,6 +36,9 @@ app.use("/auth", userRouter);
 
 app.use("/services", serviceRouter);
 
+//middleware to handle the errors //this runs when the next is passed above
+app.use(ErrorMiddleWare);
+
 //connect to the PORT from the config.env and if there is any type of of error user 5000 as a port
 
 const PORT = process.env.PORT || 5000;
@@ -44,7 +48,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(
   PORT,
   console.log(
-    `RUNNING SERVER IN ${process.env.NODE_ENV} in PORT ${process.env.PORT}`
+    `RUNNING SERVER IN ${process.env.NODE_ENV} Mode in PORT ${process.env.PORT}`
       .yellow.bold
   )
 );
