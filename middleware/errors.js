@@ -11,12 +11,24 @@ module.exports = (err, req, res, next) => {
       success: false,
       error: err,
       message: err.message,
-      stack: err.stack,
+      stack: err.stack, //we can use thiis statae because we are exetending the errorHandler from error   //the message and  status are comming from errorhandler which are passedin this middleware
     });
   }
 
-  //if we are in the produciton mode then use this code //this  is  for the user or the client
+  //if we are in the production mode then use this code //this  is  for the user or the client
   if (process.env.NODE_ENV === "PRODUCTION") {
+    //monggose id error handling
+    if (err.name === "CastError") {
+      //err.name is casterror in the err.stack
+      const message = `Resource not found : ${err.path}`;
+      err = new ErrorHandler(message, 404);
+    }
+    //schema validation error handling//please enter title //please enter description
+    if (err.name === "ValidationError") {
+      const message = Object.values(err.errors).map((value) => value.message);
+      err = new ErrorHandler(message, 400);
+    }
+
     res.status(err.statusCode).json({
       success: false,
       message: err.message,
