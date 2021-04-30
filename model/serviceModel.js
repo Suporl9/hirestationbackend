@@ -42,10 +42,10 @@ const serviceSchema = new mongoose.Schema({
       //enum is known as fix number of possible values//we can have only these values as the categories
       //user have to select only from these categories
       values: [
-        "Graphics and Design",
-        "Game Development",
-        "Web Programming",
-        "Mobile Apps",
+        "Graphics-And-Design",
+        "Game-Development",
+        "Web-Programming",
+        "Mobile-Apps",
       ],
       message: "Please select correct category for the service",
     },
