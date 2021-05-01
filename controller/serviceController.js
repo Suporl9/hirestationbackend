@@ -17,9 +17,15 @@ const postService = catchAsyncErrors(async (req, res) => {
 //get all the services in the database!! GET => localhost/services and /services?keyword=graphics-design (graphics-design is the title)
 
 const getAllServices = catchAsyncErrors(async (req, res) => {
+  const resDataPerPage = 6;
+
+  const pageCount = await serviceModel.countDocuments();
+
   const apiFeatures = new APIFeatures(serviceModel.find(), req.query)
     .search()
-    .filter(); //chained the search function in class apifeatures because  we returned this.this function is commented on apifeatures class
+    .filter()
+    .pagination(resDataPerPage); //chained the search function in class apifeatures because  we returned this.this function is commented on apifeatures class
+
   // console.log(apiFeatures);
 
   const getServices = await apiFeatures.query;
@@ -29,6 +35,7 @@ const getAllServices = catchAsyncErrors(async (req, res) => {
   return res.status(200).json({
     success: true,
     count: getServices.length,
+    pageCount,
     getServices,
   });
 });
