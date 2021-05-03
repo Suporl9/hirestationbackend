@@ -4,7 +4,7 @@ const userController = require("../controller/userController");
 
 //registering route
 
-router.route("/").post(userController.postRegisterController);
+router.route("/new").post(userController.postRegisterController);
 
 //loggin in route
 

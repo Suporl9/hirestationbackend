@@ -1,6 +1,10 @@
 const UserModel = require("../model/usermodel");
+const ErrorHandler = require("../utils/errorHandler");
+const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
+// register new user //post => localhost/auth/new
 
 const postRegisterController = async (req, res) => {
   try {
@@ -40,7 +44,7 @@ const postRegisterController = async (req, res) => {
         errorMessage: "An account with this email already exists!",
       });
 
-    //hashing the password using bcrypt
+    //hashing the password using bcrypt //before saving it to the database
 
     const salt = await bcrypt.genSalt();
 
@@ -55,26 +59,36 @@ const postRegisterController = async (req, res) => {
     //now log the user with JWT //this will only give token so that the user is logged in with a token
 
     const token = jwt.sign(
+      //payload //data we want to store in token
       {
         user: savedUser._id,
       },
       process.env.JWT_SECRET
+      //later add jwtexpirestime to expire after certain time//fot example 7 days,8 days or 1 hour
     );
+
     // console.log(token);
 
     //send the token to  the http only cookie.Doing that browser can send the cookie to the server and the server can validate the data
     res
       .cookie("token", token, {
         httpOnly: true,
+        expires: new Date( //cookie expireswithin 7 days
+          Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
+        ),
       })
-      .send();
+      .json({
+        success: true,
+        user: savedUser,
+        token,
+      });
   } catch (error) {
     console.error(err);
     res.status(500).send();
   }
 };
 
-// login post api with jwt bcrypt and http cookie!!
+// login post api with jwt bcrypt and http cookie!! post => localhost/auth/login
 
 const postLogInController = async (req, res) => {
   try {
@@ -130,29 +144,43 @@ const postLogInController = async (req, res) => {
     res
       .cookie("token", token, {
         httpOnly: true,
+        expires: new Date( //expires after 7 days
+          Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
+        ),
       })
-      .send();
+      .json({
+        success: true,
+        user: existingUser,
+        token,
+      });
   } catch (error) {
     console.log(error);
   }
 };
 
+//logout registered user //get => localhost/auth/logout
+
 const getLogOutController = async (req, res) => {
   //removing the cookie on logging out
 
-  res
-    .cookie("token", "", {
-      //he cookie will be set to an empty string instead of the the previous cookie
+  res.cookie("token", "", {
+    //he cookie will be set to an empty string instead of the the previous cookie
 
-      httpOnly: true,
-      expires: new Date(0),
+    httpOnly: true,
+    expires: new Date(0),
 
-      //international standard time apparanttly  //this clears the  cookie from the browser..so now the tokenis also removed
-    })
-    .send();
+    //international standard time apparanttly  //this clears the  cookie from the browser..so now the tokenis also removed
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logged out",
+  });
 };
 
 //to checkif the user is logged  in or not sends true is yes and false if not
+
+//if the user is logged in//verify token from cookies and validate with JWT //GET => localhost/auth/loggedin
 
 const getLoggedin = (req, res) => {
   try {
