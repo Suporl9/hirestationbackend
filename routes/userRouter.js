@@ -10,6 +10,14 @@ router.route("/new").post(userController.postRegisterController);
 
 router.route("/login").post(userController.postLogInController);
 
+//password forgotten
+
+router.route("/password/forgot").post(userController.forgotPassword);
+
+//password reset
+
+router.route("/password/reset/:token").post(userController.ResetPassword);
+
 //logging out route
 
 router.route("/logout").get(userController.getLogOutController);

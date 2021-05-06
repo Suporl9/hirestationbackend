@@ -7,6 +7,9 @@ const APIFeatures = require("../utils/apiFeatures");
 //wraps with the middleware and if here are not  any errors it resolves..if itt has any error it rejects and  sents to the error Handler middleware
 
 const postService = catchAsyncErrors(async (req, res) => {
+  // req.body.user = req.user;
+  req.body.user = req.user.id; //we set req.user in auth so we have a user which was verified with the token//and in user it has user id obviously
+
   const service = await serviceModel.create(req.body); //this creates and triggers  the .save to save our req on the database
   return res.status(201).json({
     success: true,

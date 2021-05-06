@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const crypto = require("crypto");
 
 const UserSchema = mongoose.Schema({
   fullname: {
@@ -42,5 +43,25 @@ const UserSchema = mongoose.Schema({
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });
+
+//Instance Methods
+
+//assign a funciton to the "methods" object of our UserSchema  //we need to create this instance cause we need to get and store later on of ou  schema
+
+UserSchema.methods.getResetPasswordToken = function () {
+  //Generating a reset token with crypto
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
+  //hash the resetToken and set it to resetPasswordToken //this will be savedin the database and will he used later to compare will the plain token to validate the user
+
+  this.resetPasswordToken = crypto //using thsi kwyword indicate resetPasswordToken is of usermodel which we will save later on and not now
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  //also set the token expiry date
+  this.resetPasswordExpire = Date.now() + 30 * 60 * 1000;
+  return resetToken;
+};
 
 module.exports = mongoose.model("User", UserSchema);

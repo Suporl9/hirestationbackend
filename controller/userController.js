@@ -3,6 +3,8 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
 
 // register new user //post => localhost/auth/new
 
@@ -195,9 +197,113 @@ const getLoggedin = (req, res) => {
   }
 };
 
+//sends url to mail when  user forgets password // POST => auth/passwoed/forget
+const forgotPassword = async (req, res, next) => {
+  const user = await UserModel.findOne({ email: req.body.email });
+
+  // const { resetPasswordToken, resetPa sswordExpire } = req.body;
+
+  if (!user) {
+    return next(new ErrorHandler("Invalid Email or Password", 404));
+  }
+
+  const resetToken = user.getResetPasswordToken();
+  //if exists get reset token
+
+  await user.save({ validateBeforeSave: false }); //disables automtic validation before save    //works when validated too
+
+  //create reset password url
+
+  const resetUrl = `${req.protocol}://${req.get(
+    "host"
+  )}/auth/password/reset/${resetToken}`;
+  const message = `Your password reset url is as follows:\n\n${resetUrl}.\n\nIf you didn't request .simply ignore it!`;
+  //lets send it to a mail
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Hire Station Password Recovery!",
+      message,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `email is sent to ${user.email}`,
+    });
+  } catch (error) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    return next(new ErrorHandler(error.message, 500));
+  }
+};
+
+//for resetting the password when form is filled with password and new password //POST => auth/password/reset/:token
+const ResetPassword = async (req, res, next) => {
+  //comparing the token we have wih the hashed token in the database
+
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await UserModel.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(new ErrorHandler("Token not found or expired"));
+  }
+
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(new ErrorHandler("Password do not match!"));
+  }
+
+  const password = req.body.password;
+
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  //hashing the password using bcrypt //before saving it to the database
+
+  const salt = await bcrypt.genSalt();
+
+  const passwordHashed = await bcrypt.hash(password, salt);
+
+  user.passwordHash = passwordHashed;
+
+  await user.save();
+
+  const token = jwt.sign(
+    {
+      user: user._id,
+    },
+    process.env.JWT_SECRET
+  );
+
+  //sending that token to cookie
+
+  res
+    .cookie("token", token, {
+      httpOnly: true,
+      expires: new Date( //expires after 7 days
+        Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
+      ),
+    })
+    .json({
+      success: true,
+      user: user,
+      token,
+    });
+};
+
 module.exports = {
   postRegisterController,
   postLogInController,
   getLogOutController,
   getLoggedin,
+  forgotPassword,
+  ResetPassword,
 };
