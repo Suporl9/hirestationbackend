@@ -241,6 +241,7 @@ const forgotPassword = async (req, res, next) => {
 };
 
 //for resetting the password when form is filled with password and new password //POST => auth/password/reset/:token
+
 const ResetPassword = async (req, res, next) => {
   //comparing the token we have wih the hashed token in the database
 
@@ -299,6 +300,121 @@ const ResetPassword = async (req, res, next) => {
     });
 };
 
+//get the current info // GET => auth/me
+
+const getUserProfile = async (req, res) => {
+  const user = await UserModel.findOne(req.user._id);
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+};
+
+//update user password for logged in user  // PUT => me/password
+
+const updatePassword = async (req, res, next) => {
+  const { oldPassword, newPassword } = req.body;
+  const user = await UserModel.findOne(req.user._id);
+
+  //check if the old password is correct
+
+  const comparePassword = await bcrypt.compare(oldPassword, user.passwordHash);
+
+  if (!comparePassword) {
+    return next(new ErrorHandler("Old password incorrect!", 400));
+  }
+
+  //hash the password with bcrypt and save
+
+  const salt = await bcrypt.genSalt();
+  const passwordHashed = await bcrypt.hash(newPassword, salt);
+
+  user.passwordHash = passwordHashed;
+
+  await user.save();
+
+  //now send the jwt token since the password is updated in the database
+
+  const token = jwt.sign(
+    {
+      user: user._id,
+    },
+    process.env.JWT_SECRET
+  );
+
+  //sending that token to cookie
+
+  res
+    .cookie("token", token, {
+      httpOnly: true,
+      expires: new Date( //expires after 7 days
+        Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
+      ),
+    })
+    .json({
+      success: true,
+      user: user,
+      token,
+    });
+};
+
+//update user profile //name and email // PUT => me/update
+
+const profileUpdate = async (req, res) => {
+  const updateProfileFields = {
+    fullname: req.body.fullname,
+    email: req.body.email,
+  };
+
+  const newProfile = await UserModel.findByIdAndUpdate(
+    req.user._id,
+    updateProfileFields,
+    {
+      new: true,
+      useFindAndModify: false,
+      runValidators: true,
+    }
+  );
+
+  res.json({
+    success: true,
+    newProfile,
+  });
+};
+
+//get all the users hiring the service by the service seller user //get => auth/users
+
+const getAllUsers = async (req, res) => {
+  const users = await UserModel.find();
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+};
+
+//get an individual user according to the params id
+
+const getSingleUser = async (req, res) => {
+  const user = await UserModel.findById(req.params.id);
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+};
+
+//delete user // DELETE => auth/me/closeSubmit/:id
+
+const deleteUserProfile = async (req, res) => {
+  const user = await UserModel.findByIdAndDelete(req.params.id);
+
+  res.status(200).json({
+    success: true,
+  });
+};
+
 module.exports = {
   postRegisterController,
   postLogInController,
@@ -306,4 +422,10 @@ module.exports = {
   getLoggedin,
   forgotPassword,
   ResetPassword,
+  getUserProfile,
+  updatePassword,
+  deleteUserProfile,
+  profileUpdate,
+  getAllUsers,
+  getSingleUser,
 };

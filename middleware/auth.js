@@ -1,6 +1,8 @@
 // this code iis to check if the user is loged in and if logged in give permission to authorise
 //this is automated middleware if we want to create anything after the user is logged in
+
 const UserModel = require("../model/usermodel");
+
 const jwt = require("jsonwebtoken");
 
 const isAuthenticatedUser = async (req, res, next) => {
@@ -16,7 +18,7 @@ const isAuthenticatedUser = async (req, res, next) => {
 
     const verified = jwt.verify(token, process.env.JWT_SECRET); //now checking the token we have with the the secret password so that the token is secured and storing it to verified constant
 
-    // console.log(verified);//gonna give  us{user: "_id(database id)",iat: "//jwt issued date"}
+    // console.log(verified); //gonna give  us{user: "_id(database id)",iat: "//jwt issued date"}
 
     //creating user property  of obj req and setting the
 

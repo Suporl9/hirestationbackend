@@ -17,7 +17,8 @@ const UserSchema = mongoose.Schema({
   passwordHash: {
     type: String,
     required: [true, "Please enter your password"],
-    // select: false,
+    //fix error later on
+    // select: false, //when sending the data of the user in the frontend password is not selected(send)
   },
   // avatar: {
   // .  //since we are adding cloudinary for our pictures and product images we will be storing the URL so type string
