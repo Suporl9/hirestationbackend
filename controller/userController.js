@@ -408,7 +408,7 @@ const getSingleUser = async (req, res) => {
 //delete user // DELETE => auth/me/closeSubmit/:id
 
 const deleteUserProfile = async (req, res) => {
-  const user = await UserModel.findByIdAndDelete(req.params.id);
+  await UserModel.findByIdAndDelete(req.params.id);
 
   res.status(200).json({
     success: true,

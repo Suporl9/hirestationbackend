@@ -2,15 +2,19 @@ const serviceModel = require("../model/serviceModel");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const APIFeatures = require("../utils/apiFeatures");
-
+const userModel = require("../model/usermodel");
 //create new service => localhost/services/new  POST  and posting in the database
 //wraps with the middleware and if here are not  any errors it resolves..if itt has any error it rejects and  sents to the error Handler middleware
 
 const postService = catchAsyncErrors(async (req, res) => {
+  // const user = userModel.findById(req.user._id);
   // req.body.user = req.user;
-  req.body.user = req.user.id; //we set req.user in auth so we have a user which was verified with the token//and in user it has user id obviously
+  req.body.user = req.user._id; //we set req.user in auth so we have a user which was verified with the token//and in user it has user id obviously
 
   const service = await serviceModel.create(req.body); //this creates and triggers  the .save to save our req on the database
+
+  // user.services = service;
+
   return res.status(201).json({
     success: true,
     service,

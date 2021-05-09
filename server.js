@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const app = express();
 const userRouter = require("./routes/userRouter");
 const serviceRouter = require("./routes/serviceRouter");
+const orderRouter = require("./routes/orderRouter");
 const ConnectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -17,6 +18,7 @@ dotenv.config({ path: "./config/config.env" });
 ConnectDB(); //connecting to the database
 
 //middleware for parsing the json to javascript objects //the data is in string {name: "suporl",age: 20} and by parsing the json data  we are converting it to javascript obj.  ..so now const obj = {name: ...,age:...} ,andlater can be used as console.log(obj.name)
+
 //and when sending data to the server like this we have to pass it as string and not object ..use json.stringify() then
 
 app.use(cookieParser()); //parses cookie header and populates req.cookies //parses the incoming cookies and transform into objectt so we can read and use it
@@ -36,6 +38,8 @@ app.use(
 app.use("/auth", userRouter);
 
 app.use("/services", serviceRouter);
+
+app.use("/order", orderRouter);
 
 //middleware to handle the errors //this runs when the next is passed above
 app.use(ErrorMiddleWare);

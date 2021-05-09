@@ -41,6 +41,10 @@ const UserSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+  // services: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "services",
+  // },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });

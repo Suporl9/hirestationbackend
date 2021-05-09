@@ -24,6 +24,8 @@ const isAuthenticatedUser = async (req, res, next) => {
 
     req.user = await UserModel.findById(verified.user); //took it from the palyload //see jwt.sign in userController //we have _id in verify.user //so this is for later  user. in usercontroller in jwt.sign() we passed id is user so now we have the the id which is specific to each user and we are storing that id in req object as req.user so if we want to use it later on we ll use it as req.user
 
+    // console.log(req.user); //contains user info {role:,fullname:,email:,passwordHash,_id}
+
     //req.user property contains the user data now which will be used later on
 
     //glabbs uses id so if any any problem occur come back again
