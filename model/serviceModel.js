@@ -62,10 +62,13 @@ const serviceSchema = new mongoose.Schema({
   reviews: [
     {
       //later  we will add the reviewer profile
-
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
       //name of the reviewer
 
-      title: {
+      name: {
         type: String,
         required: true,
       },

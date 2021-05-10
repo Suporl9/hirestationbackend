@@ -109,10 +109,122 @@ const deleteService = catchAsyncErrors(async (req, res) => {
   });
 });
 
+//routes for reviews
+
+//psoting reviews //POST => services/review
+
+const createServiceReview = async (req, res, next) => {
+  const { rating, serviceId, comment } = req.body;
+
+  // if (rating >= 5) {  //we will do  this in front end
+  //   return next(new ErrorHandler("rating must be smaller than 5"), 400);
+  // }
+
+  const review = {
+    //settting the user id and name form auth.js
+    user: req.user._id,
+    name: req.user.fullname,
+    rating: Number(rating),
+    comment,
+  };
+
+  const service = await serviceModel.findById(serviceId);
+
+  const isServiceReviewed = service.reviews.find(
+    //if the user has already reviewed //check the user id in the database  and the user id of the  user that is trying to review again
+    (r) => r.user.toString() === req.user._id.toString()
+  );
+
+  //if the user already reviewed then only change comment and rating
+
+  if (isServiceReviewed) {
+    service.reviews.forEach((review) => {
+      if (review.user.toString() === req.user._id.toString()) {
+        review.comment = comment;
+
+        review.rating = rating;
+      }
+    });
+  } else {
+    //if not then save the review to the database
+    service.reviews.push(review); //pushing values  in reviews
+
+    service.numOfReviews = service.reviews.length; //total numberof reviews  in a single service
+  }
+
+  //final ratings according to the  ratings  in reviews array
+
+  // await service.review.reduce((acc, currentValue) => acc + currentValue.rating) / 5;
+
+  service.ratings =
+    service.reviews.reduce((acc, item) => item.rating + acc, 0) /
+    service.reviews.length; //reducing all the ratings into a single  rating
+
+  await service.save({ validateBeforeSave: true });
+
+  res.status(200).json({
+    success: true,
+  });
+};
+
+//get service reviews => GET => reviews?id=""
+
+const getServiceReviews = async (req, res, next) => {
+  const service = await serviceModel.findById(req.query.id); //id of service //will pass in the url
+
+  if (!service) {
+    return next(new ErrorHandler("service not found!"));
+  }
+
+  res.status(200).json({
+    success: true,
+    reviews: service.reviews,
+  });
+};
+
+//delete the reveiws  by an user (filter and then laer update) //DELETE => service/review
+
+const deleteServiceReview = async (req, res) => {
+  //providing  the service id in query
+  const service = await serviceModel.findById(req.query.serviceId);
+  //only take out(filter  out the reviews)//take everything out other than this condition => mathing string review id sent in query and review id in database)
+  const reviews = service.reviews.filter(
+    (review) => review._id.toString() !== req.query.id.toString()
+  );
+  // console.log(reviews.length);
+
+  const numOfReviews = reviews.length; //new filtered reviews length
+
+  const ratings = //something is wrong here  //ites doing 23  where the total value should have  been 8 + 5 + 5
+    service.reviews.reduce((acc, item) => item.rating + acc, 0) / //here in reduce total is wrong //fix later
+    reviews.length;
+
+  await serviceModel.findByIdAndUpdate(
+    req.query.serviceId,
+    {
+      reviews,
+      ratings,
+      numOfReviews,
+    },
+    {
+      new: true, //the default is to send the old and unaltered document but if we set new to true  it returns the new altered document!
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+  });
+};
+
 module.exports = {
   getAllServices,
   postService,
   getAService,
   updateService,
   deleteService,
+  createServiceReview,
+  getServiceReviews,
+  deleteServiceReview,
 };

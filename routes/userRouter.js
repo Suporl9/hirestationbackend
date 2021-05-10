@@ -49,7 +49,7 @@ router
   .route("/me/closeSubmit/:id")
   .delete(isAuthenticatedUser, userController.deleteUserProfile);
 
-//get all the users hiring the service by the service seller user
+//get all the users hiring the service by the service seller user //to be fixed later on
 
 router.route("/users").get(isAuthenticatedUser, userController.getAllUsers);
 
