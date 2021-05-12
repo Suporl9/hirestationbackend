@@ -10,6 +10,10 @@ router.route("/new").post(isAuthenticatedUser, serviceController.postService); /
 //get all the services in the database
 router.route("/").get(isAuthenticatedUser, serviceController.getAllServices); //isauthenticated has _id so it knows which user //in req.user
 
+//get user posted services
+
+router.route("/me").get(isAuthenticatedUser, serviceController.getUserServices);
+
 //for creating a review for the service
 
 router

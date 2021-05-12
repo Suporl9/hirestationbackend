@@ -21,6 +21,17 @@ const postService = catchAsyncErrors(async (req, res) => {
   });
 });
 
+//gett services posted by the user
+
+const getUserServices = catchAsyncErrors(async (req, res) => {
+  const services = await serviceModel.find({ user: req.user._id });
+
+  res.status(200).json({
+    success: true,
+    services,
+  });
+});
+
 //get all the services in the database!! GET => localhost/services and /services?keyword=graphics-design (graphics-design is the title)
 
 const getAllServices = catchAsyncErrors(async (req, res) => {
@@ -220,6 +231,7 @@ const deleteServiceReview = async (req, res) => {
 
 module.exports = {
   getAllServices,
+  getUserServices,
   postService,
   getAService,
   updateService,

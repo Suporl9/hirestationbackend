@@ -51,8 +51,8 @@ const myOrders = async (req, res) => {
 
 //oders by the admin which will be user // GET => order/myOrders
 //////////////////////////////////////////////////////////////////////////////////////////////////////
+//this is wrong  //find an alternative way to fix this
 const userAdminOrders = async (req, res) => {
-  //this is wrong  //find an alternative way to fix this
   const orders = await ordersModel.find({ user: req.user._id });
 
   let totalAmount = 0;
