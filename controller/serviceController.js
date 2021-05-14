@@ -37,7 +37,7 @@ const getUserServices = catchAsyncErrors(async (req, res) => {
 const getAllServices = catchAsyncErrors(async (req, res) => {
   const resDataPerPage = 6;
 
-  const pageCount = await serviceModel.countDocuments();
+  const servicesCount = await serviceModel.countDocuments();
 
   const apiFeatures = new APIFeatures(serviceModel.find(), req.query)
     .search()
@@ -53,7 +53,7 @@ const getAllServices = catchAsyncErrors(async (req, res) => {
   return res.status(200).json({
     success: true,
     count: getServices.length,
-    pageCount,
+    servicesCount,
     getServices,
   });
 });

@@ -8,7 +8,7 @@ const isAuthenticatedUser = require("../middleware/auth");
 router.route("/new").post(isAuthenticatedUser, serviceController.postService); //if the user is logged in or has the token still available then only he will be able to create a new customer or else it would be unauthorized
 
 //get all the services in the database
-router.route("/").get(isAuthenticatedUser, serviceController.getAllServices); //isauthenticated has _id so it knows which user //in req.user
+router.route("/").get(serviceController.getAllServices); //isauthenticated has _id so it knows which user //in req.user
 
 //get user posted services
 
