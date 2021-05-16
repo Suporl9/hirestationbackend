@@ -41,10 +41,7 @@ const UserSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
-  // services: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "services",
-  // },
+  services: [{ type: mongoose.Schema.Types.ObjectId, ref: "service" }],
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });
@@ -69,4 +66,4 @@ UserSchema.methods.getResetPasswordToken = function () {
   return resetToken;
 };
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model("user", UserSchema);

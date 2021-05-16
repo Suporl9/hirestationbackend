@@ -64,7 +64,7 @@ const serviceSchema = new mongoose.Schema({
       //later  we will add the reviewer profile
       user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "user",
       },
       //name of the reviewer
 
@@ -84,11 +84,13 @@ const serviceSchema = new mongoose.Schema({
       },
     },
   ],
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+  user: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

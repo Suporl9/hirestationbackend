@@ -6,14 +6,28 @@ const userModel = require("../model/usermodel");
 //create new service => localhost/services/new  POST  and posting in the database
 //wraps with the middleware and if here are not  any errors it resolves..if itt has any error it rejects and  sents to the error Handler middleware
 
-const postService = catchAsyncErrors(async (req, res) => {
-  // const user = userModel.findById(req.user._id);
-  // req.body.user = req.user;
+const postService = catchAsyncErrors(async (req, res, next) => {
   req.body.user = req.user._id; //we set req.user in auth so we have a user which was verified with the token//and in user it has user id obviously
 
-  const service = await serviceModel.create(req.body); //this creates and triggers  the .save to save our req on the database
+  //creating new instance of the servicemodel before saving it into the database
+  const service = new serviceModel(req.body);
 
-  // user.services = service;
+  //getting the current user id  whcih the req.body.user has
+  const user = await userModel.findById(req.body.user);
+
+  // console.log(user);
+
+  // setting the user in the service schema to the current user
+  service.user = user;
+
+  //and then saving
+  await service.save();
+
+  //pushing the curren service details whic contains the user id in the user schema
+  user.services.push(service);
+
+  //saving the service _id  to the user schema
+  await user.save();
 
   return res.status(201).json({
     success: true,
@@ -25,6 +39,7 @@ const postService = catchAsyncErrors(async (req, res) => {
 
 const getUserServices = catchAsyncErrors(async (req, res) => {
   const services = await serviceModel.find({ user: req.user._id });
+  // .populate("User");
 
   res.status(200).json({
     success: true,
@@ -35,11 +50,14 @@ const getUserServices = catchAsyncErrors(async (req, res) => {
 //get all the services in the database!! GET => localhost/services and /services?keyword=graphics-design (graphics-design is the title)
 
 const getAllServices = catchAsyncErrors(async (req, res) => {
-  const resDataPerPage = 6;
+  const resDataPerPage = 8;
 
   const servicesCount = await serviceModel.countDocuments();
 
-  const apiFeatures = new APIFeatures(serviceModel.find(), req.query)
+  const apiFeatures = new APIFeatures(
+    serviceModel.find().populate("user"),
+    req.query
+  )
     .search()
     .filter()
     .pagination(resDataPerPage); //chained the search function in class apifeatures because  we returned this.this function is commented on apifeatures class
@@ -62,7 +80,7 @@ const getAllServices = catchAsyncErrors(async (req, res) => {
 
 const getAService = catchAsyncErrors(async (req, res, next) => {
   const id = req.params.id;
-  const getService = await serviceModel.findById(id);
+  const getService = await serviceModel.findById(id).populate("user");
   if (!getService) {
     return next(new ErrorHandler("Service not found!!", 404)); //if anything is passed as argument  in the next method express treats it as error   //pass return so that  next  line wont run and the  server will crash
   }

@@ -303,7 +303,7 @@ const ResetPassword = async (req, res, next) => {
 //get the current info // GET => auth/me
 
 const getUserProfile = async (req, res) => {
-  const user = await UserModel.findOne(req.user._id);
+  const user = await UserModel.findOne(req.user._id).populate("services");
 
   res.status(200).json({
     success: true,
