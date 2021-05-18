@@ -12,7 +12,7 @@ const postRegisterController = async (req, res) => {
   try {
     //destructing the req.body that we ll be sending to the database with the post request
 
-    const { fullname, email, password, passwordverify } = req.body;
+    const { fullname, email, password, passwordverify, bio } = req.body;
 
     //  validation
 
@@ -54,7 +54,7 @@ const postRegisterController = async (req, res) => {
 
     //saving the email and hashedpassword in the database!!
 
-    const newUser = new UserModel({ fullname, email, passwordHash });
+    const newUser = new UserModel({ fullname, email, passwordHash, bio });
 
     const savedUser = await newUser.save();
 

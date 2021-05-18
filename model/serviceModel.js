@@ -55,6 +55,9 @@ const serviceSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter service seller!"],
   },
+  sellerBio: {
+    type: String,
+  },
   numOfReviews: {
     type: Number,
     default: 0,

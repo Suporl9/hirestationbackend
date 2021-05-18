@@ -37,6 +37,9 @@ const UserSchema = mongoose.Schema({
     type: String,
     default: "admin",
   },
+  bio: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),

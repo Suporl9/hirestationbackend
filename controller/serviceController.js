@@ -20,6 +20,11 @@ const postService = catchAsyncErrors(async (req, res, next) => {
   // setting the user in the service schema to the current user
   service.user = user;
 
+  //
+
+  service.seller = user.fullname;
+
+  service.sellerBio = user.bio;
   //and then saving
   await service.save();
 
