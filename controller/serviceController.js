@@ -52,7 +52,7 @@ const getUserServices = catchAsyncErrors(async (req, res) => {
   });
 });
 
-//get all the services in the database!! GET => localhost/services and /services?keyword=graphics-design (graphics-design is the title)
+//get all the services in the database!! GET => localhost/services and /services?keyword=graphics-design&category=Web-Development&price[gte]=1&price[lte]=20000 (graphics-design is the title)
 
 const getAllServices = catchAsyncErrors(async (req, res) => {
   const resDataPerPage = 8;
@@ -76,6 +76,7 @@ const getAllServices = catchAsyncErrors(async (req, res) => {
   return res.status(200).json({
     success: true,
     count: getServices.length,
+    resDataPerPage,
     servicesCount,
     getServices,
   });
