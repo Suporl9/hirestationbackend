@@ -64,18 +64,20 @@ const getAllServices = catchAsyncErrors(async (req, res) => {
     req.query
   )
     .search()
-    .filter()
-    .pagination(resDataPerPage); //chained the search function in class apifeatures because  we returned this.this function is commented on apifeatures class
+    .filter();
+
+  let getServices = await apiFeatures.query;
+  let filteredServiceCount = getServices.length;
 
   // console.log(apiFeatures);
-
-  const getServices = await apiFeatures.query;
+  apiFeatures.pagination(resDataPerPage); //chained the search function in class apifeatures because  we returned this.this function is commented on apifeatures class
+  getServices = await apiFeatures.query;
 
   // const getServices = await serviceModel.find(); //this is a query
 
   return res.status(200).json({
     success: true,
-    count: getServices.length,
+    filteredServiceCount: filteredServiceCount,
     resDataPerPage,
     servicesCount,
     getServices,

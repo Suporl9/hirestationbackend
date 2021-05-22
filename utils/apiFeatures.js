@@ -8,7 +8,7 @@ class APIFeatures {
   }
 
   search = () => {
-    const keyword = this.queryString.keyword //if the keyword was passed  run first one or else reun second where we change nothing and sendit to query
+    const keyword = this.queryString.keyword //if the keyword was passed  run first one or else run second where we change nothing and sendit to query
       ? {
           title: {
             $regex: this.queryString.keyword, //for checking in database eith regex pattern //regex is a sequence of characters that forms a search pattern
