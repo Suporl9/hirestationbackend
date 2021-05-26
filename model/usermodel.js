@@ -20,18 +20,18 @@ const UserSchema = mongoose.Schema({
     //fix error later on
     // select: false, //when sending the data of the user in the frontend password is not selected(send)
   },
-  // avatar: {
-  // .  //since we are adding cloudinary for our pictures and product images we will be storing the URL so type string
-  // .  //get the two values from cloudinary //the _id and url
-  //   public_id: {
-  //     type: String,
-  //     required: true,
-  //   },
-  //   url: {
-  //     type: String,
-  //     required: true,
-  //   },
-  // },
+  avatar: {
+    //since we are adding cloudinary for our pictures and product images we will be storing the URL so type string
+    //get the two values from cloudinary //the _id and url
+    public_id: {
+      required: true,
+      type: String,
+    },
+    url: {
+      required: true,
+      type: String,
+    },
+  },
 
   role: {
     type: String,

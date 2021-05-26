@@ -7,6 +7,7 @@ module.exports = (err, req, res, next) => {
 
   //if we are in development mode use this code showing all the generic errors like message statuscode and the stack trace
   if (process.env.NODE_ENV === "DEVELOPMENT") {
+    console.log(err.message, err.stack);
     res.status(err.statusCode).json({
       success: false,
       error: err,

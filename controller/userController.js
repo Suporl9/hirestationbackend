@@ -4,95 +4,118 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const cloudinary = require("cloudinary");
+
 const sendEmail = require("../utils/sendEmail");
 
 // register new user //post => localhost/auth/new
 
-const postRegisterController = async (req, res) => {
-  try {
-    //destructing the req.body that we ll be sending to the database with the post request
+const postRegisterController = catchAsyncErrors(async (req, res, next) => {
+  //setting cloudinry//which folder to upload to
 
-    const { fullname, email, password, passwordverify, bio } = req.body;
+  // console.log(req.body.avatar);
 
-    //  validation
+  const avatar = req.body.avatar;
 
-    //if the user does not enter all the fields we are sending the errmessage instead of just registering it
+  // console.log(avatar);
 
-    if (!fullname || !email || !password || !passwordverify)
-      return res.status(400).json({
-        errorMessage: "Please enter all the required fields",
-      });
+  const result = await cloudinary.v2.uploader.upload_large(avatar, {
+    //upload less than 700 kb for now
 
-    // if the user enter password less than 6 we send the errormessage to the frontend
+    folder: "avatars",
+    // width: 150,
+    // crop: "scale",
+  });
 
-    if (password.length < 6)
-      return res.status(400).json({
-        errorMessage: "Password must be more than 6 characters",
-      });
+  // console.log(result);
 
-    //   if the password doesnot match with the paswordverify we send the error
+  //destructing the req.body that we ll be sending to the database with the post request
 
-    if (password !== passwordverify)
-      return res.status(400).json({
-        errorMessage: "Please enter the same password twice!",
-      });
+  const { fullname, email, password, passwordverify } = req.body;
 
-    //For checking if the email entered by the user already exists in the database and if it exists then error message
+  //  validation
 
-    const existingUser = await UserModel.findOne({ email: email });
+  //if the user does not enter all the fields we are sending the errmessage instead of just registering it
 
-    if (existingUser)
-      return res.status(400).json({
-        errorMessage: "An account with this email already exists!",
-      });
+  if (!fullname || !email || !password || !passwordverify || !avatar)
+    return next(new ErrorHandler("Please fill all fields", 400));
 
-    //hashing the password using bcrypt //before saving it to the database
+  // if the user enter password less than 6 we send the errormessage to the frontend
 
-    const salt = await bcrypt.genSalt();
-
-    const passwordHash = await bcrypt.hash(password, salt);
-
-    //saving the email and hashedpassword in the database!!
-
-    const newUser = new UserModel({ fullname, email, passwordHash, bio });
-
-    const savedUser = await newUser.save();
-
-    //now log the user with JWT //this will only give token so that the user is logged in with a token
-
-    const token = jwt.sign(
-      //payload //data we want to store in token
-      {
-        user: savedUser._id,
-      },
-      process.env.JWT_SECRET
-      //later add jwtexpirestime to expire after certain time//fot example 7 days,8 days or 1 hour
+  if (password.length < 6)
+    return next(
+      new ErrorHandler("Password mustt be more than 6 characters!", 400)
     );
 
-    // console.log(token);
+  //   if the password doesnot match with the paswordverify we send the error
 
-    //send the token to  the http only cookie.Doing that browser can send the cookie to the server and the server can validate the data
-    res
-      .cookie("token", token, {
-        httpOnly: true,
-        expires: new Date( //cookie expireswithin 7 days
-          Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
-        ),
-      })
-      .json({
-        success: true,
-        user: savedUser,
-        token,
-      });
-  } catch (error) {
-    console.error(err);
-    res.status(500).send();
+  if (password !== passwordverify)
+    return next(new ErrorHandler("Password do not match!!", 400));
+
+  //For checking if the email entered by the user already exists in the database and if it exists then error message
+
+  const existingUser = await UserModel.findOne({ email: email });
+
+  if (existingUser)
+    return next(
+      new ErrorHandler("Account with this email already exists!!", 400)
+    );
+
+  //hashing the password using bcrypt //before saving it to the database
+
+  const salt = await bcrypt.genSalt();
+
+  const passwordHash = await bcrypt.hash(password, salt);
+
+  //saving the email and hashedpassword in the database!!
+
+  const newUser = new UserModel({
+    fullname,
+    email,
+    passwordHash,
+
+    avatar: {
+      public_id: result.public_id, //public_id is identifier that is used for  accessing the uploaded asset
+      url: result.secure_url, //secure_url contains https so  using this instead of just the url
+    },
+  });
+
+  if (!newUser) {
+    return next(new ErrorHandler("not created", 404));
   }
-};
+  const savedUser = await newUser.save();
+
+  //now log the user with JWT //this will only give token so that the user is logged in with a token
+
+  const token = jwt.sign(
+    //payload //data we want to store in token
+    {
+      user: savedUser._id,
+    },
+    process.env.JWT_SECRET
+    //later add jwtexpirestime to expire after certain time//fot example 7 days,8 days or 1 hour
+  );
+
+  // console.log(token);
+
+  //send the token to  the http only cookie.Doing that browser can send the cookie to the server and the server can validate the data
+  res
+    .cookie("token", token, {
+      httpOnly: true,
+      expires: new Date( //cookie expireswithin 7 days
+        Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
+      ),
+    })
+    .json({
+      success: true,
+      user: savedUser,
+      token,
+    });
+});
 
 // login post api with jwt bcrypt and http cookie!! post => localhost/auth/login
 
-const postLogInController = async (req, res) => {
+const postLogInController = catchAsyncErrors(async (req, res) => {
   try {
     //destructuring the values that we'll be sending to the server in login page
 
@@ -158,7 +181,7 @@ const postLogInController = async (req, res) => {
   } catch (error) {
     console.log(error);
   }
-};
+});
 
 //logout registered user //get => localhost/auth/logout
 
