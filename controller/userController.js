@@ -5,7 +5,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const cloudinary = require("cloudinary");
-
 const sendEmail = require("../utils/sendEmail");
 
 // register new user //post => localhost/auth/new
@@ -18,7 +17,6 @@ const postRegisterController = catchAsyncErrors(async (req, res, next) => {
   const avatar = req.body.avatar;
 
   // console.log(avatar);
-
   const result = await cloudinary.v2.uploader.upload_large(avatar, {
     //upload less than 700 kb for now
 
@@ -385,11 +383,34 @@ const updatePassword = async (req, res, next) => {
 //update user profile //name and email // PUT => me/update
 
 const profileUpdate = async (req, res) => {
+  // console.log(req.body.bio);
   const updateProfileFields = {
     fullname: req.body.fullname,
     email: req.body.email,
   };
+  if (req.body.avatar !== "") {
+    const user = await UserModel.findById(req.user._id);
 
+    const image_id = user.avatar.public_id;
+
+    await cloudinary.v2.uploader.destroy(image_id);
+
+    const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      //upload less than 700 kb for now
+
+      folder: "avatars",
+      // width: 150,
+      // crop: "scale",
+    });
+    updateProfileFields.avatar = {
+      public_id: result.public_id,
+      url: result.secure_url,
+    };
+  }
+
+  if (req.body.bio !== "") {
+    updateProfileFields.bio = req.body.bio;
+  }
   const newProfile = await UserModel.findByIdAndUpdate(
     req.user._id,
     updateProfileFields,
@@ -400,11 +421,36 @@ const profileUpdate = async (req, res) => {
     }
   );
 
-  res.json({
+  res.status(200).json({
     success: true,
-    newProfile,
+    // newProfile,
   });
 };
+
+// const profileUpdateAvatar = async (req, res) => {
+//   const avatar = req.body.data;
+//   console.log(avatar);
+
+// const user = await UserModel.findById(req.user._id);
+// const image_id = user.avatar.public_id;
+// const destroyed = await cloudinary.v2.uploader.destroy(image_id);
+
+// const result = await cloudinary.v2.uploader.upload(avatar, {
+//   folder: "avatars",
+// });
+
+// avatar = {
+//   public_id: result.public_id,
+//   url: result.secure_url,
+// };
+
+// const avataruser = await UserModel.findByIdAndUpdate(req.user._id, avatar, {
+//   new: true,
+//   runValidators: true,
+//   useFindAndModify: false,
+// });
+// res.status(200).json({ success: true });
+// };
 
 //get all the users hiring the service by the service seller user //get => auth/users
 
@@ -449,6 +495,7 @@ module.exports = {
   updatePassword,
   deleteUserProfile,
   profileUpdate,
+  // profileUpdateAvatar,
   getAllUsers,
   getSingleUser,
 };

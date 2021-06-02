@@ -40,8 +40,12 @@ router
 //update the profile for the logged in user(name and email)
 
 router
-  .route("/me/udpate")
+  .route("/me/update")
   .put(isAuthenticatedUser, userController.profileUpdate);
+
+// router
+//   .route("/avatarUpdate")
+//   .put(isAuthenticatedUser, userController.profileUpdateAvatar);
 
 //delete own profile  //testing for now
 

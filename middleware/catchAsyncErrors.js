@@ -1,9 +1,12 @@
 //the anonymous function with func parameter holds our async handler funcion from controller and wraps it in a promise which either resolves or rejects (throws catch and move to errormiddleware)
-module.exports = (func) => (
-  req,
-  res,
-  next //double arrow //curried function
-) => Promise.resolve(func(req, res, next)).catch(next);
+module.exports =
+  (func) =>
+  (
+    req,
+    res,
+    next //double arrow //curried function
+  ) =>
+    Promise.resolve(func(req, res, next)).catch(next);
 
 //lets break it down
 
