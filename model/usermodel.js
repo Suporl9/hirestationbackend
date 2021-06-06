@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const crypto = require("crypto");
 
-const UserSchema = mongoose.Schema({
+const UserSchema = new mongoose.Schema({
   fullname: {
     type: String,
     required: [true, "Please enter your fullname!"],
@@ -44,7 +44,20 @@ const UserSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
-  services: [{ type: mongoose.Schema.Types.ObjectId, ref: "service" }],
+  services: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "service",
+    },
+  ],
+
+  // carts: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: "cart",
+  //   },
+  // ],
+
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });

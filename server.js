@@ -11,6 +11,7 @@ const fileUpload = require("express-fileupload");
 const userRouter = require("./routes/userRouter");
 const serviceRouter = require("./routes/serviceRouter");
 const orderRouter = require("./routes/orderRouter");
+const cartRouter = require("./routes/cartRouter");
 const ConnectDB = require("./config/db");
 
 const ErrorMiddleWare = require("./middleware/errors");
@@ -62,6 +63,8 @@ app.use("/auth", userRouter);
 app.use("/services", serviceRouter);
 
 app.use("/order", orderRouter);
+
+app.use("/cart", cartRouter);
 
 //middleware to handle the errors //this runs when the next is passed above
 app.use(ErrorMiddleWare);

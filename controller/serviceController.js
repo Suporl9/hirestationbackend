@@ -40,12 +40,12 @@ const postService = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-//get services posted by the user
+//get services posted by the user  => services/me
 
 const getUserServices = catchAsyncErrors(async (req, res) => {
-  const services = await serviceModel.find({ user: req.user._id });
+  let services = await serviceModel.find({ user: req.user._id });
   // .populate("User");
-
+  services.services;
   res.status(200).json({
     success: true,
     services,

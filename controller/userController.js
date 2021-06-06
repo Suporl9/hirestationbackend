@@ -218,7 +218,7 @@ const getLoggedin = (req, res) => {
   }
 };
 
-//sends url to mail when  user forgets password // POST => auth/passwoed/forget
+//sends url to mail when  user forgets password // POST => auth/password/forget
 const forgotPassword = async (req, res, next) => {
   const user = await UserModel.findOne({ email: req.body.email });
 
@@ -235,9 +235,7 @@ const forgotPassword = async (req, res, next) => {
 
   //create reset password url
 
-  const resetUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/auth/password/reset/${resetToken}`;
+  const resetUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
   const message = `Your password reset url is as follows:\n\n${resetUrl}.\n\nIf you didn't request .simply ignore it!`;
   //lets send it to a mail
   try {
@@ -249,7 +247,7 @@ const forgotPassword = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: `email is sent to ${user.email}`,
+      message: `email sent to ${user.email}`,
     });
   } catch (error) {
     user.resetPasswordToken = undefined;
@@ -279,9 +277,9 @@ const ResetPassword = async (req, res, next) => {
     return next(new ErrorHandler("Token not found or expired"));
   }
 
-  if (req.body.password !== req.body.confirmPassword) {
-    return next(new ErrorHandler("Password do not match!"));
-  }
+  // if (req.body.password !== req.body.confirmPassword) {
+  //   return next(new ErrorHandler("Password do not match!"));
+  // }
 
   const password = req.body.password;
 
@@ -325,6 +323,7 @@ const ResetPassword = async (req, res, next) => {
 
 const getUserProfile = async (req, res) => {
   const user = await UserModel.findOne(req.user._id).populate("services");
+  // .populate("carts");
 
   res.status(200).json({
     success: true,
@@ -332,12 +331,15 @@ const getUserProfile = async (req, res) => {
   });
 };
 
-//update user password for logged in user  // PUT => me/password
+//update user password for logged in user  // PUT => auth/password/update
 
 const updatePassword = async (req, res, next) => {
-  const { oldPassword, newPassword } = req.body;
+  const { oldPassword, newPassword, verifyNewPassword } = req.body;
   const user = await UserModel.findOne(req.user._id);
 
+  if (newPassword !== verifyNewPassword) {
+    return next(new ErrorHandler("Passwords do not match!!"));
+  }
   //check if the old password is correct
 
   const comparePassword = await bcrypt.compare(oldPassword, user.passwordHash);
@@ -367,6 +369,7 @@ const updatePassword = async (req, res, next) => {
   //sending that token to cookie
 
   res
+    .status(200)
     .cookie("token", token, {
       httpOnly: true,
       expires: new Date( //expires after 7 days
@@ -375,7 +378,7 @@ const updatePassword = async (req, res, next) => {
     })
     .json({
       success: true,
-      user: user,
+      // user: user,
       token,
     });
 };
