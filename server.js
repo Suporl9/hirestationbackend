@@ -12,6 +12,7 @@ const userRouter = require("./routes/userRouter");
 const serviceRouter = require("./routes/serviceRouter");
 const orderRouter = require("./routes/orderRouter");
 const cartRouter = require("./routes/cartRouter");
+const paymentRouter = require("./routes/paymentRouter");
 const ConnectDB = require("./config/db");
 
 const ErrorMiddleWare = require("./middleware/errors");
@@ -65,6 +66,8 @@ app.use("/services", serviceRouter);
 app.use("/order", orderRouter);
 
 app.use("/cart", cartRouter);
+
+app.use("/payment", paymentRouter);
 
 //middleware to handle the errors //this runs when the next is passed above
 app.use(ErrorMiddleWare);

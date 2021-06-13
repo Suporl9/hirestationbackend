@@ -37,8 +37,9 @@ const postInCart = catchAsyncErrors(async (req, res, next) => {
 //get user cartItems => get => cart/getMyCartItems
 
 const getMyCartItems = catchAsyncErrors(async (req, res, next) => {
-  const myCartItems = await cartModel.find({ user: req.user._id });
-  // .populate("service")
+  const myCartItems = await cartModel
+    .find({ user: req.user._id })
+    .populate("service");
   // .populate("user");
 
   res.status(200).json({
