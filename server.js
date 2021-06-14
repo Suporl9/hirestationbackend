@@ -19,6 +19,8 @@ const ErrorMiddleWare = require("./middleware/errors");
 
 //path for working with the directories
 
+// require("dotenv").config({ path: "backend/config/config.env" });
+
 dotenv.config({ path: "./config/config.env" });
 
 ConnectDB(); //connecting to the database
