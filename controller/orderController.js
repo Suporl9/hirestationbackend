@@ -5,12 +5,13 @@ const { findById } = require("../model/ordersModel");
 
 //post an order bya user => GET order/new
 const postOrder = async (req, res) => {
-  const { orderItems, paymentInfo, totalPrice } = req.body;
-
+  // console.log(req.body);
+  const { service, paymentInfo, totalPrice, orderInfo } = req.body;
   const order = await ordersModel.create({
-    orderItems,
+    orderInfo,
     paymentInfo,
     totalPrice,
+    service,
     user: req.user._id,
     paidAt: Date.now(),
   });
@@ -24,9 +25,7 @@ const postOrder = async (req, res) => {
 //get a single order according to id
 
 const getSingleOrder = async (req, res, next) => {
-  const order = await ordersModel
-    .findById(req.params.id)
-    .populate("User", "fullname email");
+  const order = await ordersModel.findById(req.params.id).populate("user");
   if (!order) {
     return next(new ErrorHandler("No order found with this ID", 404));
   }
@@ -41,7 +40,9 @@ const getSingleOrder = async (req, res, next) => {
 
 const myOrders = async (req, res) => {
   //   req.body.user = req.user._id;
-  const orders = await ordersModel.find({ user: req.user._id });
+  const orders = await ordersModel
+    .find({ user: req.user._id })
+    .populate("service");
 
   res.status(200).json({
     success: true,

@@ -8,29 +8,19 @@ const ordersSchema = new mongoose.Schema({
     required: true,
   },
 
-  orderItems: [
-    {
-      title: {
-        type: String,
-        required: true,
-      },
-      image: {
-        type: String,
-        required: true,
-      },
-      // service user want to hire
-      service: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "service",
-        required: true,
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-    },
-  ],
+  // service user want to hire
+  service: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "service",
+    required: true,
+  },
 
+  orderInfo: {
+    phoneNumber: {
+      type: String,
+      required: true,
+    },
+  },
   paymentInfo: {
     // we will use stripe
     id: {
