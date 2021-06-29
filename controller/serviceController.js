@@ -148,7 +148,7 @@ const deleteService = catchAsyncErrors(async (req, res) => {
 
 //routes for reviews
 
-//psoting reviews //POST => services/review
+//psoting reviews //PUT => services/review
 
 const createServiceReview = async (req, res, next) => {
   const { rating, serviceId, comment } = req.body;

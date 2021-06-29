@@ -29,7 +29,10 @@ const getSingleOrder = async (req, res, next) => {
   if (!order) {
     return next(new ErrorHandler("No order found with this ID", 404));
   }
-
+  // if unauthorised user tries to view the details //uncomment this later on
+  //if(req.user._id.toString() !== order.user._id.toString){
+  // return next(new ErrorHandler("user is unauthorised!"))
+  // }
   res.status(200).json({
     success: true,
     order,

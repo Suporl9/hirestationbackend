@@ -18,7 +18,7 @@ router.route("/me").get(isAuthenticatedUser, serviceController.getUserServices);
 
 router
   .route("/review")
-  .post(isAuthenticatedUser, serviceController.createServiceReview);
+  .put(isAuthenticatedUser, serviceController.createServiceReview);
 
 //get service reviews according to the query passed in the link // services/review?id=""
 
