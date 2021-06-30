@@ -2,11 +2,38 @@ const serviceModel = require("../model/serviceModel");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const APIFeatures = require("../utils/apiFeatures");
+const cloudinary = require("cloudinary");
 const userModel = require("../model/usermodel");
+const cartModel = require("../model/cartModel");
 //create new service => localhost/services/new  POST  and posting in the database
 //wraps with the middleware and if here are not  any errors it resolves..if itt has any error it rejects and  sents to the error Handler middleware
 
 const postService = catchAsyncErrors(async (req, res, next) => {
+  let images = []; //setting array to  store in cloudinary and after that set puclic_id and serure url to mongo
+
+  if (typeof req.body.images === "string") {
+    //if  user uploads only one image it will be an string and if there are multiple images then it will  come as array
+    images.push(req.body.images); //as it will come in string setting as object in array
+  } else {
+    images = req.body.images; //readymade array comes so replacing the empty array with the req.images array
+  }
+
+  let imagesLink = []; //setting empty array for storing public_id and secure_url
+
+  for (let i = 0; i < images.length; i++) {
+    //for each obj in array store in cloudinary and set  imagesLink array with public_id and secure_url
+    const result = await cloudinary.v2.uploader.upload(images[i], {
+      folder: "services",
+    });
+
+    imagesLink.push({
+      //push obj to imagesLink array
+      public_id: result.public_id,
+      url: result.secure_url,
+    });
+  }
+  req.body.images = imagesLink; //as our model has images array ..  replacing imagesLink with images array to store in database
+
   req.body.user = req.user._id; //we set req.user in auth so we have a user which was verified with the token//and in user it has user id obviously
 
   //creating new instance of the servicemodel before saving it into the database
@@ -126,9 +153,10 @@ const updateService = catchAsyncErrors(async (req, res) => {
 
 //now for the deleting the service by id provided from the user DELETE => services/:id
 
-const deleteService = catchAsyncErrors(async (req, res) => {
+const deleteService = catchAsyncErrors(async (req, res, next) => {
   const id = req.params.id;
   const deleteServ = await serviceModel.findById(id);
+  // const deleteItem = await cartModel.findById(id);  //try this later
 
   if (!deleteServ) {
     return next(new ErrorHandler("Service Not Found!", 404));
@@ -137,12 +165,21 @@ const deleteService = catchAsyncErrors(async (req, res) => {
     //   message: "Service not found",
     // });
   }
+
+  for (let i = 0; i < deleteServ.images.length; i++) {
+    //deleting image url from cloudinary
+    const result = await cloudinary.v2.uploader.destroy(
+      deleteServ.images[i].public_id
+    );
+  }
+
   await deleteServ.remove();
+  // await deleteItem.remove();
 
   return res.status(200).json({
     success: true,
     message: "successfully deleted the service",
-    data: {},
+    // data: {},
   });
 });
 
@@ -219,7 +256,7 @@ const getServiceReviews = async (req, res, next) => {
   });
 };
 
-//delete the reveiws  by an user (filter and then laer update) //DELETE => service/review
+//delete the reveiws  by an user (filter and then later update) //DELETE => service/review
 
 const deleteServiceReview = async (req, res) => {
   //providing  the service id in query
