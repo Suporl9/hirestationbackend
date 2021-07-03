@@ -94,10 +94,13 @@ const getAllServices = catchAsyncErrors(async (req, res) => {
     .filter();
 
   let getServices = await apiFeatures.query;
+
   let filteredServiceCount = getServices.length;
 
   // console.log(apiFeatures);
+
   apiFeatures.pagination(resDataPerPage); //chained the search function in class apifeatures because  we returned this.this function is commented on apifeatures class
+
   getServices = await apiFeatures.query;
 
   // const getServices = await serviceModel.find(); //this is a query
@@ -130,19 +133,61 @@ const getAService = catchAsyncErrors(async (req, res, next) => {
 
 const updateService = catchAsyncErrors(async (req, res) => {
   const id = req.params.id;
-  const updateSer = await serviceModel.findById(id); //using let cause  we will be changing the updateSer later on
+
+  let updateSer = await serviceModel.findById(id); //using let cause  we will be changing the updateSer later on
 
   if (!updateSer) {
     return next(new ErrorHandler("Service no Found", 404));
-    // res.status(404).json({
-    //   success: false,
-    //   message: "Service not found",
-    // });
   }
-  await updateSer.findByIdAndUpdate(id, req.body, {
+
+  let images = []; //array to be saved in the database
+
+  if (typeof req.body.images === "string") {
+    //user can send only one data or multiple data ,it its one data its would be string and if its multiple data its array..so checking
+
+    // if one data pushing in images empty array
+
+    images.push(req.body.images);
+  } else {
+    images = req.body.images; //if  multiple just replacing with empty images array
+  }
+
+  if (images !== undefined) {
+    //in order to upload new data to cloudinary we have to delete previous images //so taking specific service images and using for loop to remove images from cloudinary
+
+    //updateSer. gives the images of specific service images
+
+    for (let i = 0; i < updateSer.images.length; i++) {
+      const result = await cloudinary.v2.uploader.destroy(
+        updateSer.images[i].public_id //each images i.e[i] from that service
+      );
+    }
+
+    let imagesLink = []; //setting images Link to replace with images array that we have set
+
+    // now for each images coming from frontend its going to upload in cloudinary folder services
+
+    for (let i = 0; i < images.length; i++) {
+      const result = await cloudinary.v2.uploader.upload(images[i], {
+        folder: "services",
+      });
+
+      //we have result now which contains public id and secure url //setting each result obj in imagesLink empty array
+      imagesLink.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    //at last we have to pass "images" in database and not "imagesLink so replacing req.body.images with the imagesLink array"
+
+    req.body.images = imagesLink;
+  }
+
+  updateSer = await serviceModel.findByIdAndUpdate(id, req.body, {
     new: true, //the default is to send the old and unaltered document but if we set new to true  it returns the new altered document!
-    // runValidators: true,
     useFindAndModify: false,
+    runValidators: true,
   }); //should pass third parameter object to avoid the deprication warning like findoneandupdate without useFindandModify  set to false are depricated
 
   return res.status(201).json({
@@ -160,23 +205,19 @@ const deleteService = catchAsyncErrors(async (req, res, next) => {
 
   if (!deleteServ) {
     return next(new ErrorHandler("Service Not Found!", 404));
-    // res.status(404).json({
-    //   success: false,
-    //   message: "Service not found",
-    // });
   }
 
   for (let i = 0; i < deleteServ.images.length; i++) {
     //deleting image url from cloudinary
+
     const result = await cloudinary.v2.uploader.destroy(
       deleteServ.images[i].public_id
     );
   }
 
   await deleteServ.remove();
-  // await deleteItem.remove();
 
-  return res.status(200).json({
+  res.status(200).json({
     success: true,
     message: "successfully deleted the service",
     // data: {},
