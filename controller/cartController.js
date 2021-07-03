@@ -1,4 +1,5 @@
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
+const { populate } = require("../model/cartModel");
 const cartModel = require("../model/cartModel");
 const serviceModel = require("../model/serviceModel");
 const userModel = require("../model/usermodel");
@@ -37,9 +38,22 @@ const postInCart = catchAsyncErrors(async (req, res, next) => {
 //get user cartItems => get => cart/getMyCartItems
 
 const getMyCartItems = catchAsyncErrors(async (req, res, next) => {
-  const myCartItems = await cartModel
-    .find({ user: req.user._id })
-    .populate("service");
+  const myCartItems = await cartModel.find({ user: req.user._id }).populate({
+    path: "service",
+    populate: [
+      {
+        path: "user",
+        model: "user",
+        // populate: [
+        //   {
+        //     path: "services",
+        //     model: "service",
+        //   },
+        // ],
+      },
+    ],
+  });
+  // .exec(function (err, docs) {});
   // .populate("user");
 
   res.status(200).json({

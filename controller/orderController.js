@@ -6,11 +6,12 @@ const { findById } = require("../model/ordersModel");
 //post an order bya user => GET order/new
 const postOrder = async (req, res) => {
   // console.log(req.body);
-  const { service, paymentInfo, totalPrice, orderInfo } = req.body;
+  const { service, paymentInfo, totalPrice, orderInfo, adminUser } = req.body;
   const order = await ordersModel.create({
     orderInfo,
     paymentInfo,
     totalPrice,
+    adminUser,
     service,
     user: req.user._id,
     paidAt: Date.now(),
@@ -57,7 +58,16 @@ const myOrders = async (req, res) => {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //this is wrong  //find an alternative way to fix this
 const userAdminOrders = async (req, res) => {
-  const orders = await ordersModel.find({ user: req.user._id });
+  const orders = await ordersModel.find({ adminUser: req.user._id }).populate([
+    {
+      path: "service",
+      model: "service",
+    },
+    {
+      path: "user",
+      model: "user",
+    },
+  ]);
 
   let totalAmount = 0;
 

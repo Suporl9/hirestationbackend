@@ -43,6 +43,11 @@ const ordersSchema = new mongoose.Schema({
     required: true,
     default: 0.0,
   },
+  adminUser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: true,
+  },
   orderStatus: {
     type: String,
     required: true,
