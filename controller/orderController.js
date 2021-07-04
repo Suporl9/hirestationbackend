@@ -26,7 +26,16 @@ const postOrder = async (req, res) => {
 //get a single order according to id
 
 const getSingleOrder = async (req, res, next) => {
-  const order = await ordersModel.findById(req.params.id).populate("service");
+  const order = await ordersModel.findById(req.params.id).populate([
+    {
+      path: "service",
+      model: "service",
+    },
+    {
+      path: "user",
+      model: "user",
+    },
+  ]);
   if (!order) {
     return next(new ErrorHandler("No order found with this ID", 404));
   }
