@@ -113,7 +113,7 @@ const postRegisterController = catchAsyncErrors(async (req, res, next) => {
 
 // login post api with jwt bcrypt and http cookie!! post => localhost/auth/login
 
-const postLogInController = catchAsyncErrors(async (req, res) => {
+const postLogInController = catchAsyncErrors(async (req, res, next) => {
   try {
     //destructuring the values that we'll be sending to the server in login page
 
@@ -135,9 +135,7 @@ const postLogInController = catchAsyncErrors(async (req, res) => {
     //if not the correct email in database:
 
     if (!existingUser)
-      return res.status(400).json({
-        errorMessage: "Email or password is wrong!", //even if we know we are checking for email we dont want to let hackers know we if theyahave incorrect email or password!!
-      });
+      return next(new ErrorHandler("Invalid Email or Password", 401));
 
     //checking if the password(hashed) is correct with bcrypt.compare
 
@@ -149,9 +147,7 @@ const postLogInController = catchAsyncErrors(async (req, res) => {
     //if the password is not correct
 
     if (!passwordCorrect)
-      return res.status(400).json({
-        errorMessage: "Email or password is wrong!",
-      });
+      return next(new ErrorHandler("Invalid Email or Password", 401));
 
     //now making a token with jwt for the user
 
@@ -468,9 +464,11 @@ const getAllUsers = async (req, res) => {
 
 //get an individual user according to the params id
 
-const getSingleUser = async (req, res) => {
-  const user = await UserModel.findById(req.params.id);
-
+const getSingleUser = async (req, res, next) => {
+  const user = await UserModel.findById(req.params.id).populate("services");
+  if (!user) {
+    return next(new ErrorHandler("user not found!!", 404)); //if anything is passed as argument  in the next method express treats it as error   //pass return so that  next  line wont run and the  server will crash
+  }
   res.status(200).json({
     success: true,
     user,

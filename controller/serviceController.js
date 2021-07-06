@@ -72,7 +72,7 @@ const postService = catchAsyncErrors(async (req, res, next) => {
 const getUserServices = catchAsyncErrors(async (req, res) => {
   let services = await serviceModel.find({ user: req.user._id });
   // .populate("User");
-  services.services;
+  // services.services;
   res.status(200).json({
     success: true,
     services,
@@ -118,7 +118,21 @@ const getAllServices = catchAsyncErrors(async (req, res) => {
 
 const getAService = catchAsyncErrors(async (req, res, next) => {
   const id = req.params.id;
-  const getService = await serviceModel.findById(id).populate("user");
+  const getService = await serviceModel.findById(id).populate([
+    {
+      path: "user",
+      model: "user",
+    },
+    {
+      path: "reviews",
+      populate: [
+        {
+          path: "user",
+          model: "user",
+        },
+      ],
+    },
+  ]);
   if (!getService) {
     return next(new ErrorHandler("Service not found!!", 404)); //if anything is passed as argument  in the next method express treats it as error   //pass return so that  next  line wont run and the  server will crash
   }
@@ -201,6 +215,8 @@ const updateService = catchAsyncErrors(async (req, res) => {
 const deleteService = catchAsyncErrors(async (req, res, next) => {
   const id = req.params.id;
   const deleteServ = await serviceModel.findById(id);
+  const cartItem = await cartModel.findOne({ service: id });
+
   // const deleteItem = await cartModel.findById(id);  //try this later
 
   if (!deleteServ) {
@@ -214,7 +230,9 @@ const deleteService = catchAsyncErrors(async (req, res, next) => {
       deleteServ.images[i].public_id
     );
   }
-
+  if (cartItem) {
+    await cartItem.remove();
+  }
   await deleteServ.remove();
 
   res.status(200).json({
