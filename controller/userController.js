@@ -11,80 +11,59 @@ const sendEmail = require("../utils/sendEmail");
 
 const postRegisterController = catchAsyncErrors(async (req, res, next) => {
   //setting cloudinry//which folder to upload to
-
   // console.log(req.body.avatar);
 
+  req.body.avatar = cloudinary.url(
+    "https://res.cloudinary.com/hire-station/image/upload/v1625564982/avatars/default_brykje.png"
+  );
   const avatar = req.body.avatar;
-
   // console.log(avatar);
   const result = await cloudinary.v2.uploader.upload_large(avatar, {
     //upload less than 700 kb for now
-
     folder: "avatars",
     // width: 150,
     // crop: "scale",
   });
-
-  // console.log(result);
-
+  // console.log("avatar", result);
+  // // console.log(result);
   //destructing the req.body that we ll be sending to the database with the post request
-
   const { fullname, email, password, passwordverify } = req.body;
-
   //  validation
-
   //if the user does not enter all the fields we are sending the errmessage instead of just registering it
-
   if (!fullname || !email || !password || !passwordverify || !avatar)
     return next(new ErrorHandler("Please fill all fields", 400));
-
   // if the user enter password less than 6 we send the errormessage to the frontend
-
   if (password.length < 6)
     return next(
       new ErrorHandler("Password mustt be more than 6 characters!", 400)
     );
-
   //   if the password doesnot match with the paswordverify we send the error
-
   if (password !== passwordverify)
     return next(new ErrorHandler("Password do not match!!", 400));
-
   //For checking if the email entered by the user already exists in the database and if it exists then error message
-
   const existingUser = await UserModel.findOne({ email: email });
-
   if (existingUser)
     return next(
       new ErrorHandler("Account with this email already exists!!", 400)
     );
-
   //hashing the password using bcrypt //before saving it to the database
-
   const salt = await bcrypt.genSalt();
-
   const passwordHash = await bcrypt.hash(password, salt);
-
   //saving the email and hashedpassword in the database!!
-
   const newUser = new UserModel({
     fullname,
     email,
     passwordHash,
-
     avatar: {
       public_id: result.public_id, //public_id is identifier that is used for  accessing the uploaded asset
       url: result.secure_url, //secure_url contains https so  using this instead of just the url
     },
   });
-
   if (!newUser) {
     return next(new ErrorHandler("not created", 404));
   }
   const savedUser = await newUser.save();
-
   //now log the user with JWT //this will only give token so that the user is logged in with a token
-
   const token = jwt.sign(
     //payload //data we want to store in token
     {
@@ -93,9 +72,7 @@ const postRegisterController = catchAsyncErrors(async (req, res, next) => {
     process.env.JWT_SECRET
     //later add jwtexpirestime to expire after certain time//fot example 7 days,8 days or 1 hour
   );
-
   // console.log(token);
-
   //send the token to  the http only cookie.Doing that browser can send the cookie to the server and the server can validate the data
   res
     .cookie("token", token, {
