@@ -387,6 +387,9 @@ const profileUpdate = async (req, res) => {
   if (req.body.bio !== "") {
     updateProfileFields.bio = req.body.bio;
   }
+  if (req.body.from !== "") {
+    updateProfileFields.from = req.body.from;
+  }
   const newProfile = await UserModel.findByIdAndUpdate(
     req.user._id,
     updateProfileFields,
