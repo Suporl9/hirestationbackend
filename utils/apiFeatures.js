@@ -7,7 +7,7 @@ class APIFeatures {
     this.queryString = queryString;
   }
 
-  search = () => {
+  search() {
     const keyword = this.queryString.keyword //if the keyword was passed  run first one or else run second where we change nothing and sendit to query
       ? {
           title: {
@@ -25,9 +25,9 @@ class APIFeatures {
     this.query = this.query.find({ ...keyword }); //since there are more properties in keyword obj using spread opertor doesnot mutate  //or we can use it like this .find(keyword)
 
     return this; //refers to the obj instance on ehich the method is being called..usedn for chaining without returning this we cannot chain wih its parent class
-  };
+  }
 
-  filter = () => {
+  filter() {
     const queryCopy = { ...this.queryString };
 
     // console.log(queryCopy);
@@ -63,16 +63,16 @@ class APIFeatures {
     // console.log(queryCopy);
 
     return this;
-  };
+  }
 
-  pagination = (resDataPerPage) => {
+  pagination(resDataPerPage) {
     //wehave to implement the skip and limit //skip for skipping data according to the page//for page 1 skip 0(front)//for page 2 skip 6 service data
     const currentPage = Number(this.queryString.page) || 1; //anything passed in page= ,its going to convert in to Number
     const skip = resDataPerPage * (currentPage - 1);
 
     this.query = this.query.limit(resDataPerPage).skip(skip); //limits with resData = 6 and skips acording to the page if page 2 skips 6 in front
     return this;
-  };
+  }
 }
 
 module.exports = APIFeatures;

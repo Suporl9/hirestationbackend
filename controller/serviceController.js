@@ -107,7 +107,7 @@ const getAllServices = catchAsyncErrors(async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    filteredServiceCount: filteredServiceCount,
+    filteredServiceCount,
     resDataPerPage,
     servicesCount,
     getServices,
