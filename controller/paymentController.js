@@ -1,8 +1,7 @@
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
-
+//THIS SECTION DOES NOT GET STRIPE SECRET KEY FROM ENV VARIABLE SO HARDCODE IT(SECRET KEY) OR DECLARE DOTENV ON TOP
 const stripe = require("stripe")(
-  "sk_test_51J1YOYSCxWLgibrfkE8WU5MFDax9Qv5aEgu3KeJP1bBUz7CRXDZBrTY80m8yqa8lZNcghjlVbwRL16u5Z6Na9sws00c73fdIU0"
-  // process.env.STRIPE_SECRET_KEY
+  process.env.STRIPE_SECRET_KEY
 );
 
 // console.log("key", process.env.STRIPE_SECRET_KEY);
