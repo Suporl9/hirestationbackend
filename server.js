@@ -1,27 +1,27 @@
-const express = require("express");
-const colors = require("colors");
-const path = require("path");
-const cloudinary = require("cloudinary");
-const dotenv = require("dotenv");
+const express = require('express');
+const colors = require('colors');
+const path = require('path');
+const cloudinary = require('cloudinary');
+const dotenv = require('dotenv');
 const app = express();
 
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const fileUpload = require("express-fileupload");
-const userRouter = require("./routes/userRouter");
-const serviceRouter = require("./routes/serviceRouter");
-const orderRouter = require("./routes/orderRouter");
-const cartRouter = require("./routes/cartRouter");
-const paymentRouter = require("./routes/paymentRouter");
-const ConnectDB = require("./config/db");
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const fileUpload = require('express-fileupload');
+const userRouter = require('./routes/userRouter');
+const serviceRouter = require('./routes/serviceRouter');
+const orderRouter = require('./routes/orderRouter');
+const cartRouter = require('./routes/cartRouter');
+const paymentRouter = require('./routes/paymentRouter');
+const ConnectDB = require('./config/db');
 
-const ErrorMiddleWare = require("./middleware/errors");
+const ErrorMiddleWare = require('./middleware/errors');
 
 //path for working with the directories
 
 // require("dotenv").config({ path: "backend/config/config.env" });
 
-dotenv.config({ path: "./config/config.env" });
+dotenv.config({ path: './config/config.env' });
 
 ConnectDB(); //connecting to the database
 
@@ -37,13 +37,13 @@ cloudinary.config({
 
 //use json body parser for post method  \||/
 
-app.use(express.json({ limit: "50mb" })); //to be able to use res.status.json we nee do declare the app.use(express.json())  //this is a middleware which we need when doing req.body.amount or req.body.text //before to parse it would be bodyparser.json() but now it is available out of the box
+app.use(express.json({ limit: '50mb' })); //to be able to use res.status.json we nee do declare the app.use(express.json())  //this is a middleware which we need when doing req.body.amount or req.body.text //before to parse it would be bodyparser.json() but now it is available out of the box
 
 //urlencoded({ extended: true }) - middleware for parsing bodies from URL. ..
 
 //acceptts the utf-8 encoding of the body..later a new body  object containing the parsed data is populated on the request obj suppose req.body
 
-app.use(express.urlencoded({ limit: "50mb", extended: true })); //body parser is deprecated and now has been added out of the box
+app.use(express.urlencoded({ limit: '50mb', extended: true })); //body parser is deprecated and now has been added out of the box
 
 app.use(cookieParser()); //parses cookie header and populates req.cookies //parses the incoming cookies and transform into objectt so we can read and use it
 
@@ -52,22 +52,22 @@ app.use(fileUpload());
 app.use(
   //with cors we can pass the cookies and data back and forth!!
   cors({
-    origin: "http://localhost:3000", //cors is cross platform to connect with the front end
+    origin: 'https://hirestation.vercel.app', //cors is cross platform to connect with the front end
     credentials: true, //with this we can pass the cookie from the server to the browser
   })
 );
 
 //our  routes in here  //or middlewares
 
-app.use("/auth", userRouter);
+app.use('/auth', userRouter);
 
-app.use("/services", serviceRouter);
+app.use('/services', serviceRouter);
 
-app.use("/order", orderRouter);
+app.use('/order', orderRouter);
 
-app.use("/cart", cartRouter);
+app.use('/cart', cartRouter);
 
-app.use("/payment", paymentRouter);
+app.use('/payment', paymentRouter);
 
 //middleware to handle the errors //this runs when the next is passed above
 app.use(ErrorMiddleWare);
