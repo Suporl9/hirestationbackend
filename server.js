@@ -48,11 +48,14 @@ app.use(express.urlencoded({ limit: '50mb', extended: true })); //body parser is
 app.use(cookieParser()); //parses cookie header and populates req.cookies //parses the incoming cookies and transform into objectt so we can read and use it
 
 app.use(fileUpload());
-
+const allowedOrigins = [
+  'https://hirestation.vercel.app',
+  'http://localhost:3000',
+];
 app.use(
   //with cors we can pass the cookies and data back and forth!!
   cors({
-    origin: 'https://hirestation.vercel.app', //cors is cross platform to connect with the front end
+    origin: allowedOrigins, //cors is cross platform to connect with the front end
     credentials: true, //with this we can pass the cookie from the server to the browser
   })
 );
