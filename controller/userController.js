@@ -1,11 +1,11 @@
-const UserModel = require("../model/usermodel");
-const ErrorHandler = require("../utils/errorHandler");
-const catchAsyncErrors = require("../middleware/catchAsyncErrors");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const cloudinary = require("cloudinary");
-const sendEmail = require("../utils/sendEmail");
+const UserModel = require('../model/usermodel');
+const ErrorHandler = require('../utils/errorHandler');
+const catchAsyncErrors = require('../middleware/catchAsyncErrors');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const cloudinary = require('cloudinary');
+const sendEmail = require('../utils/sendEmail');
 
 // register new user //post => localhost/auth/new
 
@@ -14,13 +14,13 @@ const postRegisterController = catchAsyncErrors(async (req, res, next) => {
   // console.log(req.body.avatar);
 
   req.body.avatar = cloudinary.url(
-    "https://res.cloudinary.com/hire-station/image/upload/v1625564982/avatars/default_brykje.png"
+    'https://res.cloudinary.com/hire-station/image/upload/v1625564982/avatars/default_brykje.png'
   );
   const avatar = req.body.avatar;
   // console.log(avatar);
   const result = await cloudinary.v2.uploader.upload_large(avatar, {
     //upload less than 700 kb for now
-    folder: "avatars",
+    folder: 'avatars',
     // width: 150,
     // crop: "scale",
   });
@@ -31,20 +31,20 @@ const postRegisterController = catchAsyncErrors(async (req, res, next) => {
   //  validation
   //if the user does not enter all the fields we are sending the errmessage instead of just registering it
   if (!fullname || !email || !password || !passwordverify || !avatar)
-    return next(new ErrorHandler("Please fill all fields", 400));
+    return next(new ErrorHandler('Please fill all fields', 400));
   // if the user enter password less than 6 we send the errormessage to the frontend
   if (password.length < 6)
     return next(
-      new ErrorHandler("Password mustt be more than 6 characters!", 400)
+      new ErrorHandler('Password mustt be more than 6 characters!', 400)
     );
   //   if the password doesnot match with the paswordverify we send the error
   if (password !== passwordverify)
-    return next(new ErrorHandler("Password do not match!!", 400));
+    return next(new ErrorHandler('Password do not match!!', 400));
   //For checking if the email entered by the user already exists in the database and if it exists then error message
   const existingUser = await UserModel.findOne({ email: email });
   if (existingUser)
     return next(
-      new ErrorHandler("Account with this email already exists!!", 400)
+      new ErrorHandler('Account with this email already exists!!', 400)
     );
   //hashing the password using bcrypt //before saving it to the database
   const salt = await bcrypt.genSalt();
@@ -60,7 +60,7 @@ const postRegisterController = catchAsyncErrors(async (req, res, next) => {
     },
   });
   if (!newUser) {
-    return next(new ErrorHandler("not created", 404));
+    return next(new ErrorHandler('not created', 404));
   }
   const savedUser = await newUser.save();
   //now log the user with JWT //this will only give token so that the user is logged in with a token
@@ -75,8 +75,8 @@ const postRegisterController = catchAsyncErrors(async (req, res, next) => {
   // console.log(token);
   //send the token to  the http only cookie.Doing that browser can send the cookie to the server and the server can validate the data
   res
-    .cookie("token", token, {
-      httpOnly: true,
+    .cookie('token', token, {
+      httpOnly: false,
       expires: new Date( //cookie expireswithin 7 days
         Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
       ),
@@ -103,7 +103,7 @@ const postLogInController = catchAsyncErrors(async (req, res, next) => {
     if (!email || !password)
       return res
         .status(400)
-        .json({ errorMessage: "Please fill all the fields." });
+        .json({ errorMessage: 'Please fill all the fields.' });
 
     //checking the sent email in the database from the server
 
@@ -112,7 +112,7 @@ const postLogInController = catchAsyncErrors(async (req, res, next) => {
     //if not the correct email in database:
 
     if (!existingUser)
-      return next(new ErrorHandler("Invalid Email or Password", 401));
+      return next(new ErrorHandler('Invalid Email or Password', 401));
 
     //checking if the password(hashed) is correct with bcrypt.compare
 
@@ -124,7 +124,7 @@ const postLogInController = catchAsyncErrors(async (req, res, next) => {
     //if the password is not correct
 
     if (!passwordCorrect)
-      return next(new ErrorHandler("Invalid Email or Password", 401));
+      return next(new ErrorHandler('Invalid Email or Password', 401));
 
     //now making a token with jwt for the user
 
@@ -138,8 +138,8 @@ const postLogInController = catchAsyncErrors(async (req, res, next) => {
     //sending that token to cookie
 
     res
-      .cookie("token", token, {
-        httpOnly: true,
+      .cookie('token', token, {
+        httpOnly: false,
         expires: new Date( //expires after 7 days
           Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
         ),
@@ -159,10 +159,10 @@ const postLogInController = catchAsyncErrors(async (req, res, next) => {
 const getLogOutController = async (req, res) => {
   //removing the cookie on logging out
 
-  res.cookie("token", "", {
+  res.cookie('token', '', {
     //he cookie will be set to an empty string instead of the the previous cookie
 
-    httpOnly: true,
+    httpOnly: false,
     expires: new Date(0),
 
     //international standard time apparanttly  //this clears the  cookie from the browser..so now the tokenis also removed
@@ -170,7 +170,7 @@ const getLogOutController = async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: "Logged out",
+    message: 'Logged out',
   });
 };
 
@@ -198,7 +198,7 @@ const forgotPassword = async (req, res, next) => {
   // const { resetPasswordToken, resetPa sswordExpire } = req.body;
 
   if (!user) {
-    return next(new ErrorHandler("Invalid Email or Password", 404));
+    return next(new ErrorHandler('Invalid Email or Password', 404));
   }
 
   const resetToken = user.getResetPasswordToken();
@@ -214,7 +214,7 @@ const forgotPassword = async (req, res, next) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: "Hire Station Password Recovery!",
+      subject: 'Hire Station Password Recovery!',
       message,
     });
 
@@ -238,16 +238,16 @@ const ResetPassword = async (req, res, next) => {
   //comparing the token we have wih the hashed token in the database
 
   const resetPasswordToken = crypto
-    .createHash("sha256")
+    .createHash('sha256')
     .update(req.params.token)
-    .digest("hex");
+    .digest('hex');
 
   const user = await UserModel.findOne({
     resetPasswordToken,
     resetPasswordExpire: { $gt: Date.now() },
   });
   if (!user) {
-    return next(new ErrorHandler("Token not found or expired"));
+    return next(new ErrorHandler('Token not found or expired'));
   }
 
   // if (req.body.password !== req.body.confirmPassword) {
@@ -279,8 +279,8 @@ const ResetPassword = async (req, res, next) => {
   //sending that token to cookie
 
   res
-    .cookie("token", token, {
-      httpOnly: true,
+    .cookie('token', token, {
+      httpOnly: false,
       expires: new Date( //expires after 7 days
         Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
       ),
@@ -295,7 +295,7 @@ const ResetPassword = async (req, res, next) => {
 //get the current info // GET => auth/me
 
 const getUserProfile = async (req, res) => {
-  const user = await UserModel.findOne(req.user._id).populate("services");
+  const user = await UserModel.findOne(req.user._id).populate('services');
   // .populate("carts");
 
   res.status(200).json({
@@ -311,14 +311,14 @@ const updatePassword = async (req, res, next) => {
   const user = await UserModel.findOne(req.user._id);
 
   if (newPassword !== verifyNewPassword) {
-    return next(new ErrorHandler("Passwords do not match!!"));
+    return next(new ErrorHandler('Passwords do not match!!'));
   }
   //check if the old password is correct
 
   const comparePassword = await bcrypt.compare(oldPassword, user.passwordHash);
 
   if (!comparePassword) {
-    return next(new ErrorHandler("Old password incorrect!", 400));
+    return next(new ErrorHandler('Old password incorrect!', 400));
   }
 
   //hash the password with bcrypt and save
@@ -343,8 +343,8 @@ const updatePassword = async (req, res, next) => {
 
   res
     .status(200)
-    .cookie("token", token, {
-      httpOnly: true,
+    .cookie('token', token, {
+      httpOnly: false,
       expires: new Date( //expires after 7 days
         Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
       ),
@@ -364,7 +364,7 @@ const profileUpdate = async (req, res) => {
     fullname: req.body.fullname,
     email: req.body.email,
   };
-  if (req.body.avatar !== "") {
+  if (req.body.avatar !== '') {
     const user = await UserModel.findById(req.user._id);
 
     const image_id = user.avatar.public_id;
@@ -374,7 +374,7 @@ const profileUpdate = async (req, res) => {
     const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
       //upload less than 700 kb for now
 
-      folder: "avatars",
+      folder: 'avatars',
       // width: 150,
       // crop: "scale",
     });
@@ -384,10 +384,10 @@ const profileUpdate = async (req, res) => {
     };
   }
 
-  if (req.body.bio !== "") {
+  if (req.body.bio !== '') {
     updateProfileFields.bio = req.body.bio;
   }
-  if (req.body.from !== "") {
+  if (req.body.from !== '') {
     updateProfileFields.from = req.body.from;
   }
   const newProfile = await UserModel.findByIdAndUpdate(
@@ -445,9 +445,9 @@ const getAllUsers = async (req, res) => {
 //get an individual user according to the params id
 
 const getSingleUser = async (req, res, next) => {
-  const user = await UserModel.findById(req.params.id).populate("services");
+  const user = await UserModel.findById(req.params.id).populate('services');
   if (!user) {
-    return next(new ErrorHandler("user not found!!", 404)); //if anything is passed as argument  in the next method express treats it as error   //pass return so that  next  line wont run and the  server will crash
+    return next(new ErrorHandler('user not found!!', 404)); //if anything is passed as argument  in the next method express treats it as error   //pass return so that  next  line wont run and the  server will crash
   }
   res.status(200).json({
     success: true,
