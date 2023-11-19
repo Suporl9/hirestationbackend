@@ -76,7 +76,7 @@ const postRegisterController = catchAsyncErrors(async (req, res, next) => {
   //send the token to  the http only cookie.Doing that browser can send the cookie to the server and the server can validate the data
   res
     .cookie('token', token, {
-      httpOnly: false,
+      httpOnly: true,
       sameSite: 'None',
       secure: true,
       expires: new Date( //cookie expireswithin 7 days
@@ -141,7 +141,7 @@ const postLogInController = catchAsyncErrors(async (req, res, next) => {
 
     res
       .cookie('token', token, {
-        httpOnly: false,
+        httpOnly: true,
         sameSite: 'None',
         secure: true,
         expires: new Date( //expires after 7 days
@@ -166,7 +166,7 @@ const getLogOutController = async (req, res) => {
   res.cookie('token', '', {
     //he cookie will be set to an empty string instead of the the previous cookie
 
-    httpOnly: false,
+    httpOnly: true,
     sameSite: 'None',
     secure: true,
     expires: new Date(0),
@@ -286,7 +286,7 @@ const ResetPassword = async (req, res, next) => {
 
   res
     .cookie('token', token, {
-      httpOnly: false,
+      httpOnly: true,
       sameSite: 'None',
       secure: true,
       expires: new Date( //expires after 7 days
@@ -352,7 +352,7 @@ const updatePassword = async (req, res, next) => {
   res
     .status(200)
     .cookie('token', token, {
-      httpOnly: false,
+      httpOnly: true,
       sameSite: 'None',
       secure: true,
       expires: new Date( //expires after 7 days
