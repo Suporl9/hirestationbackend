@@ -76,7 +76,9 @@ const postRegisterController = catchAsyncErrors(async (req, res, next) => {
   //send the token to  the http only cookie.Doing that browser can send the cookie to the server and the server can validate the data
   res
     .cookie('token', token, {
-      httpOnly: false,
+      httpOnly: true,
+      sameSite: 'None',
+      secure: true,
       expires: new Date( //cookie expireswithin 7 days
         Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
       ),
@@ -139,7 +141,9 @@ const postLogInController = catchAsyncErrors(async (req, res, next) => {
 
     res
       .cookie('token', token, {
-        httpOnly: false,
+        httpOnly: true,
+        sameSite: 'None',
+        secure: true,
         expires: new Date( //expires after 7 days
           Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
         ),
@@ -162,7 +166,9 @@ const getLogOutController = async (req, res) => {
   res.cookie('token', '', {
     //he cookie will be set to an empty string instead of the the previous cookie
 
-    httpOnly: false,
+    httpOnly: true,
+    sameSite: 'None',
+    secure: true,
     expires: new Date(0),
 
     //international standard time apparanttly  //this clears the  cookie from the browser..so now the tokenis also removed
@@ -170,6 +176,8 @@ const getLogOutController = async (req, res) => {
 
   res.status(200).json({
     success: true,
+    sameSite: 'None',
+    secure: true,
     message: 'Logged out',
   });
 };
@@ -280,7 +288,9 @@ const ResetPassword = async (req, res, next) => {
 
   res
     .cookie('token', token, {
-      httpOnly: false,
+      httpOnly: true,
+      sameSite: 'None',
+      secure: true,
       expires: new Date( //expires after 7 days
         Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
       ),
@@ -344,7 +354,9 @@ const updatePassword = async (req, res, next) => {
   res
     .status(200)
     .cookie('token', token, {
-      httpOnly: false,
+      httpOnly: true,
+      sameSite: 'None',
+      secure: true,
       expires: new Date( //expires after 7 days
         Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
       ),
